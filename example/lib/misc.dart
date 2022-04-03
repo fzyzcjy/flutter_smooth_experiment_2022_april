@@ -8,7 +8,7 @@ class SimpleAnimatedBox extends StatefulWidget {
 }
 
 class _SimpleAnimatedBoxState extends State<SimpleAnimatedBox> with SingleTickerProviderStateMixin {
-  late final _controller = AnimationController(duration: const Duration(seconds: 1), vsync: this)
+  late final _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
     ..repeat(reverse: false);
 
   late final _animation = CurvedAnimation(parent: _controller, curve: Curves.linear);

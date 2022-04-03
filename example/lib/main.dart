@@ -56,47 +56,55 @@ class SecondPage extends StatefulWidget {
 }
 
 class _SecondPageState extends State<SecondPage> {
-  var heaviness = const Duration(milliseconds: 1);
+  var heaviness = const Duration(milliseconds: 8);
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            const Text('Heaviness'),
-            for (final targetHeaviness in const [
-              Duration(milliseconds: 1),
-              Duration(milliseconds: 8),
-              Duration(milliseconds: 16)
-            ])
-              Expanded(
-                child: TextButton(
-                  onPressed: () => setState(() => heaviness = targetHeaviness),
-                  child: Text(
-                    '${targetHeaviness.inMilliseconds}ms',
-                    style: TextStyle(color: targetHeaviness == heaviness ? Colors.blue : Colors.black87),
+    return Scaffold(
+      appBar: AppBar(title: const Text('First')),
+      body: Column(
+        children: [
+          Row(
+            children: [
+              const Text('Heaviness'),
+              for (final targetHeaviness in const [
+                Duration(milliseconds: 1),
+                Duration(milliseconds: 4),
+                Duration(milliseconds: 8),
+                Duration(milliseconds: 16)
+              ])
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => setState(() => heaviness = targetHeaviness),
+                    child: Text(
+                      '${targetHeaviness.inMilliseconds}ms',
+                      style: TextStyle(color: targetHeaviness == heaviness ? Colors.blue : Colors.black87),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: 100,
+              itemBuilder: (_, index) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: SizedBox(
+                  height: 32,
+                  child: Row(
+                    children: [
+                      SizedBox(width: 48, child: Text('#$index')),
+                      Expanded(child: HeavyBuildPhaseWidget(heaviness: heaviness)),
+                      Expanded(child: HeavyLayoutPhaseWidget(heaviness: heaviness)),
+                      Expanded(child: HeavyPaintPhaseWidget(heaviness: heaviness)),
+                    ],
                   ),
                 ),
               ),
-          ],
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: 100,
-            itemBuilder: (_, index) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(child: Center(child: HeavyBuildPhaseWidget(heaviness: heaviness))),
-                  Expanded(child: Center(child: HeavyLayoutPhaseWidget(heaviness: heaviness))),
-                  Expanded(child: Center(child: HeavyPaintPhaseWidget(heaviness: heaviness))),
-                ],
-              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
