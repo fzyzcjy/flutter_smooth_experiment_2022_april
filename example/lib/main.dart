@@ -88,7 +88,8 @@ class _SecondPageState extends State<SecondPage> {
                 Duration(milliseconds: 1),
                 Duration(milliseconds: 4),
                 Duration(milliseconds: 8),
-                Duration(milliseconds: 16)
+                Duration(milliseconds: 16),
+                Duration(milliseconds: 32),
               ])
                 Expanded(
                   child: TextButton(
@@ -117,7 +118,7 @@ class _SecondPageState extends State<SecondPage> {
   Widget _buildRow(BoxConstraints constraints, int index) {
     return Row(
       children: [
-        if (index < 3) const SimpleTickBox(),
+        if (index < 8) const SimpleTickBox(),
         Expanded(
           child: Smoother(
             debugName: '$index',

@@ -49,9 +49,11 @@ class _SimpleTickBoxState extends State<SimpleTickBox> with SingleTickerProvider
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
       valueListenable: _ticker,
-      builder: (_, count, __) => SizedBox(
+      builder: (_, count, __) => Container(
         width: 48 + (count % 5) * 8,
-        child: Center(
+        color: Colors.indigo.shade200,
+        child: Align(
+          alignment: Alignment.centerLeft,
           child: Text(
             '$count',
             style: const TextStyle(fontSize: 24),
