@@ -68,8 +68,15 @@ class SmootherWorkQueue {
   //   }
   // }
 
-  void executeOne({required String debugReason}) {
+  void maybeExecuteOne({
+    required String debugReason,
+    required bool forceExecuteEvenAfterDeadline,
+  }) {
     if (_queue.isEmpty) return;
+   
+    if (!forceExecuteEvenAfterDeadline && !SmootherFacade.instance.scheduler.shouldExecute()) {
+      return;
+    }
 
     final item = _queue.removeFirst();
     logger('SmootherWorkQueue executeOne run $item debugReason=$debugReason');

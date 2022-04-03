@@ -152,7 +152,7 @@ void reportFrameEnd() {
 
   void addPostFrameCallback() {
     SchedulerBinding.instance!.addPostFrameCallback((_) {
-      logger('Frame end: #$count');
+      logger('====== Frame end: #$count ======');
       count++;
       addPostFrameCallback();
     });

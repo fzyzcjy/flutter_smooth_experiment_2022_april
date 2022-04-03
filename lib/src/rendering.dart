@@ -53,7 +53,13 @@ class SmootherParentLastChildState extends State<SmootherParentLastChild> {
       // If this callback is called, then the whole subtree should have been [layout]ed successfully
       // Thus, we can deal with some old work
       // SmootherFacade.instance.workQueue.executeMany();
-      SmootherFacade.instance.workQueue.executeOne(debugReason: 'SmootherParentLastChild LayoutBuilder.build');
+      SmootherFacade.instance.workQueue.maybeExecuteOne(
+        debugReason: 'SmootherParentLastChild LayoutBuilder.build',
+        // At least execute one, even if are already too late. Otherwise, on low-end devices,
+        // it can happen that *no* work is executed on *each and every* frame, so the objects
+        // are never rendered.
+        forceExecuteEvenAfterDeadline: true,
+      );
 
       return const SizedBox.shrink();
     });
@@ -289,7 +295,10 @@ class RenderSmootherRaw extends RenderProxyBox {
 
     if (_executeWorkQueueNextWorkAfterSelfLayout) {
       _executeWorkQueueNextWorkAfterSelfLayout = false;
-      SmootherFacade.instance.workQueue.executeOne(debugReason: 'RenderSmootherRaw.performLayout');
+      SmootherFacade.instance.workQueue.maybeExecuteOne(
+        debugReason: 'RenderSmootherRaw.performLayout',
+        forceExecuteEvenAfterDeadline: false,
+      );
     }
 
     // final lastFrameStart = SmootherBindingInfo.instance.lastFrameStart ?? DateTime.now();
