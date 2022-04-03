@@ -106,7 +106,7 @@ class _SmootherSizeResolverConstant extends SmootherSizeResolver {
   const _SmootherSizeResolverConstant(this.size);
 
   @override
-  Size resolve(BoxConstraints constraints) => size;
+  Size resolve(BoxConstraints constraints) => constraints.constrain(size);
 
   @override
   bool operator ==(Object other) =>
