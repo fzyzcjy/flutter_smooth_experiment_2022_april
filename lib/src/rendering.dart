@@ -117,6 +117,8 @@ class _RenderSmootherRaw extends RenderProxyBox {
     _placeholder = value;
   }
 
+  var _childLayoutUpToDate = false;
+
   @override
   void performLayout() {
     // final lastFrameStart = SmootherBindingInfo.instance.lastFrameStart ?? DateTime.now();
@@ -125,16 +127,26 @@ class _RenderSmootherRaw extends RenderProxyBox {
 
     if (SmootherScheduler.instance.shouldStartPieceOfWork()) {
       super.performLayout();
+      _childLayoutUpToDate = true;
     } else {
       logger('[$debugName] performLayout skip');
 
       size = constraints.constrain(placeholder.size);
+      _childLayoutUpToDate = false;
 
       // TODO redo the work in the next frame
     }
 
     // logger(
     //     '[$debugName] performLayout end elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    // according to comments of [visitChildrenForSemantics], it should "skip all
+    // children that are not semantically relevant (e.g. because they are invisible)".
+    // Thus, when the child does not have up-to-date [layout], we should not visit it.
+    if (_childLayoutUpToDate) super.visitChildrenForSemantics(visitor);
   }
 
   @override
