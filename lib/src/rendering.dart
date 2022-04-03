@@ -34,6 +34,7 @@ class _SmootherParentLastChildState extends State<_SmootherParentLastChild> {
       // If, after the current frame is finished, there is still some work to be done,
       // Then we need to schedule a new frame
       if (SmootherFacade.instance.workQueue.isNotEmpty) {
+        logger('SmootherParentLastChild setState since workQueue not empty');
         setState(() {});
       }
     });
@@ -41,6 +42,7 @@ class _SmootherParentLastChildState extends State<_SmootherParentLastChild> {
     return LayoutBuilder(builder: (_, __) {
       // If this callback is called, then the whole subtree should have been [layout]ed successfully
       // Thus, we can deal with some old work
+      logger('SmootherParentLastChild call workQueue.executeMany');
       SmootherFacade.instance.workQueue.executeMany();
 
       return const SizedBox.shrink();
