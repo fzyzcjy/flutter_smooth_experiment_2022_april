@@ -6,26 +6,26 @@ import 'package:flutter_smooth_render/src/misc.dart';
 class Smoother extends StatelessWidget {
   final String debugName;
   final SmootherPlaceholder placeholder;
-  final WidgetBuilder builder;
+  final Widget child;
 
   const Smoother({
     Key? key,
     this.debugName = '',
     this.placeholder = const SmootherPlaceholder(),
-    required this.builder,
+    required this.child,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return _SmootherRaw(
       debugName: debugName,
+      placeholder: placeholder,
       // NOTE try to use [LayoutBuilder] to merge "build" phase into "layout" phase
       // TODO no need?
       // child: LayoutBuilder(
       //   builder: (context, _) => builder(context),
       // ),
-      placeholder: placeholder,
-      child: builder(context),
+      child: child,
     );
   }
 

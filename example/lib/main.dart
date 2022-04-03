@@ -99,7 +99,7 @@ class _SecondPageState extends State<SecondPage> {
           Expanded(
             // NOTE just an experiment. should place smoother at lower levels
             child: Smoother(
-              builder: (_) => ListView.builder(
+              child: ListView.builder(
                 itemCount: 100,
                 itemBuilder: (_, index) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
