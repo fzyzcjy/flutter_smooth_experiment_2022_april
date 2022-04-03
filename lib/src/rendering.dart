@@ -109,11 +109,10 @@ class _RenderSmootherRaw extends RenderProxyBox {
   }
 
   @override
-  void layout(Constraints constraints, {bool parentUsesSize = false}) {
-    logger('hi layout start ${DateTime.now()}');
-    // TODO
-    super.layout(constraints, parentUsesSize: parentUsesSize);
-    logger('hi layout end ${DateTime.now()}');
+  void performLayout() {
+    logger('hi performLayout start');
+    super.performLayout();
+    logger('hi performLayout end');
   }
 
   @override
