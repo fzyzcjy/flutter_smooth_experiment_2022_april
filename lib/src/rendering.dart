@@ -71,14 +71,23 @@ class RenderSmootherParentLastChildRaw extends RenderProxyBox with DisposeStatus
   }
 }
 
+const _kInitialDelayRenderTrigger = Object();
+const _kDefaultDelayRenderTrigger = Object();
+
 class Smoother extends StatefulWidget {
   final String debugName;
   final SmootherPlaceholder placeholder;
+
+  /// If it changes, the new [child] will be delayed to be put into tree when it is not busy
+  /// Otherwise, the [child] is *immediately* put into the tree, so this widget behaves as if a normal Container
+  final Object delayRenderTrigger;
+
   final Widget child;
 
   const Smoother({
     Key? key,
     this.debugName = '',
+    this.delayRenderTrigger = _kDefaultDelayRenderTrigger,
     this.placeholder = const SmootherPlaceholder(),
     required this.child,
   }) : super(key: key);
@@ -88,6 +97,7 @@ class Smoother extends StatefulWidget {
 }
 
 class _SmootherState extends State<Smoother> {
+  late Object activeDelayRenderTrigger;
   late Widget activeChild;
 
   // TODO maybe improve
@@ -99,6 +109,7 @@ class _SmootherState extends State<Smoother> {
 
     // hack
     final size = widget.placeholder.size.resolve(const BoxConstraints());
+    activeDelayRenderTrigger = _kInitialDelayRenderTrigger;
     activeChild = Container(
       width: size.width,
       height: size.height,
@@ -130,17 +141,17 @@ class _SmootherState extends State<Smoother> {
       child: CustomLayoutBuilder(builder: (context, _) {
         logger('Smoother.LayoutBuilder builder called');
 
-        if (activeChild != widget.child) {
-          // only if [activeChild != widget.child], we need to consider carefully whether really change this child
-          final effectiveShouldExecute =
-              !SmootherFacade.instance.hasSwapChildInCurrentFrame || SmootherFacade.instance.scheduler.shouldExecute();
-          if (effectiveShouldExecute) {
-            activeChild = widget.child;
-            SmootherFacade.instance.hasSwapChildInCurrentFrame = true;
-          } else {
-            logger('Smoother workQueue.add ${shortHash(this)} since skip execute');
-            SmootherFacade.instance.workQueue.add(_onWorkQueueExecute);
-          }
+        // only if [activeChild != widget.child], we need to consider carefully whether really change this child
+        final effectiveShouldExecute = activeDelayRenderTrigger == widget.delayRenderTrigger ||
+            !SmootherFacade.instance.hasSwapChildInCurrentFrame ||
+            SmootherFacade.instance.scheduler.shouldExecute();
+        if (effectiveShouldExecute) {
+          activeChild = widget.child;
+          activeDelayRenderTrigger = widget.delayRenderTrigger;
+          SmootherFacade.instance.hasSwapChildInCurrentFrame = true;
+        } else {
+          logger('Smoother workQueue.add ${shortHash(this)} since skip execute');
+          SmootherFacade.instance.workQueue.add(_onWorkQueueExecute);
         }
 
         return activeChild;
