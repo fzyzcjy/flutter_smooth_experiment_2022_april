@@ -30,6 +30,13 @@ class _SimpleAnimatedBoxState extends State<SimpleAnimatedBox> with SingleTicker
   }
 }
 
+// everyone should share the *same* ticker to ensure they get the same input at same time
+late final _ticker = () {
+  final ticker = ValueNotifier(0);
+  Timer.periodic(const Duration(seconds: 1), (_) => ticker.value++);
+  return ticker;
+}();
+
 class SimpleTickBox extends StatefulWidget {
   const SimpleTickBox({Key? key}) : super(key: key);
 
@@ -37,32 +44,18 @@ class SimpleTickBox extends StatefulWidget {
   _SimpleTickBoxState createState() => _SimpleTickBoxState();
 }
 
-class _SimpleTickBoxState extends State<SimpleTickBox> {
-  var count = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-
-      setState(() {
-        count++;
-      });
-    });
-  }
-
+class _SimpleTickBoxState extends State<SimpleTickBox> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48 + (count % 5) * 8,
-      child: Center(
-        child: Text(
-          '$count',
-          style: const TextStyle(fontSize: 24),
+    return ValueListenableBuilder<int>(
+      valueListenable: _ticker,
+      builder: (_, count, __) => SizedBox(
+        width: 48 + (count % 5) * 8,
+        child: Center(
+          child: Text(
+            '$count',
+            style: const TextStyle(fontSize: 24),
+          ),
         ),
       ),
     );
