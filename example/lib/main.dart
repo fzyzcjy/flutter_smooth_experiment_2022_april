@@ -6,6 +6,7 @@ import 'package:flutter_smooth_render_example/misc.dart';
 
 void main() {
   SmootherFacade.init();
+  reportFrameEnd();
   runApp(const MyApp());
 }
 
@@ -144,4 +145,18 @@ class _SecondPageState extends State<SecondPage> {
       ],
     );
   }
+}
+
+void reportFrameEnd() {
+  var count = 0;
+
+  void addPostFrameCallback() {
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      logger('Frame end: #$count');
+      count++;
+      addPostFrameCallback();
+    });
+  }
+
+  addPostFrameCallback();
 }

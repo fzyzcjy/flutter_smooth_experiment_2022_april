@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smooth_render/src/facade.dart';
 
@@ -69,11 +68,11 @@ class SmootherWorkQueue {
   //   }
   // }
 
-  void executeOne() {
+  void executeOne({required String debugReason}) {
     if (_queue.isEmpty) return;
 
     final item = _queue.removeFirst();
-    logger('SmootherWorkQueue executeUntilDeadline markNeedsLayout for ${describeIdentity(item)}');
+    logger('SmootherWorkQueue executeOne run $item debugReason=$debugReason');
     item();
   }
 }

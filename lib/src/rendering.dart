@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_smooth_render/src/facade.dart';
@@ -51,9 +52,8 @@ class SmootherParentLastChildState extends State<SmootherParentLastChild> {
     return LayoutBuilder(builder: (_, __) {
       // If this callback is called, then the whole subtree should have been [layout]ed successfully
       // Thus, we can deal with some old work
-      logger('SmootherParentLastChild call workQueue.executeOne');
       // SmootherFacade.instance.workQueue.executeMany();
-      SmootherFacade.instance.workQueue.executeOne();
+      SmootherFacade.instance.workQueue.executeOne(debugReason: 'SmootherParentLastChild LayoutBuilder.build');
 
       return const SizedBox.shrink();
     });
@@ -121,6 +121,7 @@ class _SmootherState extends State<Smoother> {
           if (SmootherFacade.instance.scheduler.shouldExecute()) {
             activeChild = widget.child;
           } else {
+            logger('Smoother workQueue.add ${shortHash(this)} since skip execute');
             SmootherFacade.instance.workQueue.add(_onWorkQueueExecute);
           }
         }
@@ -132,11 +133,18 @@ class _SmootherState extends State<Smoother> {
 
   void _onWorkQueueExecute() {
     final renderSmootherRaw = _smootherRawKey.currentContext?.findRenderObject() as RenderSmootherRaw?;
-
-    if (renderSmootherRaw != null && !renderSmootherRaw.disposed) {
-      logger('Smoother onWorkQueueExecute markNeedsLayout');
-      renderSmootherRaw.markNeedsLayout(executeWorkQueueNextWorkAfterSelfLayout: true);
+    if (renderSmootherRaw == null) {
+      logger('Smoother onWorkQueueExecute skip since renderSmootherRaw==null');
+      return;
     }
+
+    if (renderSmootherRaw.disposed) {
+      logger('Smoother onWorkQueueExecute skip since renderSmootherRaw.disposed');
+      return;
+    }
+
+    logger('Smoother onWorkQueueExecute markNeedsLayout');
+    renderSmootherRaw.markNeedsLayout(executeWorkQueueNextWorkAfterSelfLayout: true);
   }
 
   @override
@@ -281,8 +289,7 @@ class RenderSmootherRaw extends RenderProxyBox {
 
     if (_executeWorkQueueNextWorkAfterSelfLayout) {
       _executeWorkQueueNextWorkAfterSelfLayout = false;
-      logger('RenderSmootherRaw.performLayout call workQueue.executeOne');
-      SmootherFacade.instance.workQueue.executeOne();
+      SmootherFacade.instance.workQueue.executeOne(debugReason: 'RenderSmootherRaw.performLayout');
     }
 
     // final lastFrameStart = SmootherBindingInfo.instance.lastFrameStart ?? DateTime.now();
