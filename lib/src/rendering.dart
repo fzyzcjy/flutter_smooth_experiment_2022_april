@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_smooth_render/src/facade.dart';
 import 'package:flutter_smooth_render/src/misc.dart';
 
 class Smoother extends StatelessWidget {
@@ -125,7 +126,7 @@ class _RenderSmootherRaw extends RenderProxyBox {
     // logger(
     //     '[$debugName] performLayout start elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
 
-    if (SmootherScheduler.instance.shouldStartPieceOfWork()) {
+    if (SmootherFacade.instance.scheduler.shouldStartPieceOfWork()) {
       super.performLayout();
       _childLayoutUpToDate = true;
     } else {
