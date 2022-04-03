@@ -16,10 +16,11 @@ class Smoother extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SmootherRaw(
       // NOTE try to use [LayoutBuilder] to merge "build" phase into "layout" phase
-      // TODO ok?
-      child: LayoutBuilder(
-        builder: (context, _) => builder(context),
-      ),
+      // TODO no need?
+      // child: LayoutBuilder(
+      //   builder: (context, _) => builder(context),
+      // ),
+      child: builder(context),
     );
   }
 
