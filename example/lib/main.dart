@@ -97,21 +97,25 @@ class _SecondPageState extends State<SecondPage> {
             ],
           ),
           Expanded(
-            // NOTE just an experiment. should place smoother at lower levels
-            child: Smoother(
-              child: ListView.builder(
+            child: LayoutBuilder(
+              builder: (_, constraints) => ListView.builder(
                 itemCount: 100,
-                itemBuilder: (_, index) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                itemBuilder: (_, index) => Smoother(
+                  placeholder: SmootherPlaceholder(
+                    size: Size(constraints.maxWidth, 48),
+                  ),
                   child: SizedBox(
-                    height: 32,
-                    child: Row(
-                      children: [
-                        SizedBox(width: 48, child: Text('#$index')),
-                        Expanded(child: HeavyBuildPhaseWidget(heaviness: heaviness, debugName: '$index')),
-                        Expanded(child: HeavyLayoutPhaseWidget(heaviness: heaviness, debugName: '$index')),
-                        Expanded(child: HeavyPaintPhaseWidget(heaviness: heaviness, debugName: '$index')),
-                      ],
+                    height: 48,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      child: Row(
+                        children: [
+                          SizedBox(width: 48, child: Text('#$index')),
+                          Expanded(child: HeavyBuildPhaseWidget(heaviness: heaviness, debugName: '$index')),
+                          Expanded(child: HeavyLayoutPhaseWidget(heaviness: heaviness, debugName: '$index')),
+                          Expanded(child: HeavyPaintPhaseWidget(heaviness: heaviness, debugName: '$index')),
+                        ],
+                      ),
                     ),
                   ),
                 ),
