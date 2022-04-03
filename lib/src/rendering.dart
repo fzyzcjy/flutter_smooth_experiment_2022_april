@@ -16,7 +16,14 @@ class SmootherParent extends StatelessWidget {
     return Stack(
       children: [
         child,
-        const SmootherParentLastChildRaw(),
+        // NOTE use *tight* constraints, so it is a Relayout Boundary, thus
+        //      SmootherParentLastChildRaw.markNeedsLayout will not cause Stack to need to layout
+        //      Otherwise it errors: https://github.com/fzyzcjy/yplusplus/issues/3397#issuecomment-1086873609
+        const SizedBox(
+          width: 0,
+          height: 0,
+          child: SmootherParentLastChildRaw(),
+        ),
       ],
     );
   }
