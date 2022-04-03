@@ -9,7 +9,7 @@ void main() {
   reportFrameEnd();
 
   FlutterError.onError = (details) {
-    logger('!!!ERROR!!! $details');
+    printWrapped('!!!ERROR!!! $details');
   };
 
   runApp(const MyApp());
@@ -164,4 +164,11 @@ void reportFrameEnd() {
   }
 
   addPostFrameCallback();
+}
+
+/// https://stackoverflow.com/questions/49138971/logging-large-strings-from-flutter
+void printWrapped(String text) {
+  final pattern = RegExp('.{1,800}'); // 800 is the size of each chunk
+  // ignore: avoid_print
+  pattern.allMatches(text).forEach((match) => print(match.group(0)));
 }
