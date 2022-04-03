@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_smooth_render/src/facade.dart';
 
 var logger = _defaultLogger;
@@ -48,7 +49,7 @@ class SmootherWorkQueue {
     logger('SmootherWorkQueue addPostFrameCallback');
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       logger('SmootherWorkQueue inside postFrameCallback queue.len=${_queue.length}');
-     
+
       // If, after the current frame is finished, there is still some work to be done,
       // Then we need to schedule a new frame
       if (_queue.isNotEmpty) {
@@ -72,15 +73,15 @@ class SmootherWorkQueue {
   //   }
   // }
 
-  void maybeExecuteOne({
-    required String debugReason,
-    required bool forceExecuteEvenAfterDeadline,
-  }) {
+  void maybeExecuteOne({required String debugReason}) {
     if (_queue.isEmpty) return;
 
-    if (!forceExecuteEvenAfterDeadline && !SmootherFacade.instance.scheduler.shouldExecute()) {
+    final effectiveShouldExecute =
+        !SmootherFacade.instance.hasExecuteWorkQueueInCurrentFrame || SmootherFacade.instance.scheduler.shouldExecute();
+    if (!effectiveShouldExecute) {
       return;
     }
+    SmootherFacade.instance.hasExecuteWorkQueueInCurrentFrame = true;
 
     final item = _queue.removeFirst();
     logger('SmootherWorkQueue executeOne run $item debugReason=$debugReason');
@@ -90,4 +91,15 @@ class SmootherWorkQueue {
       _maybeAddPostFrameCallback();
     }
   }
+}
+
+void addPostFrameCallbackForAllFrames(void Function(Duration) run) {
+  void addPostFrameCallback() {
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+      run(timeStamp);
+      addPostFrameCallback();
+    });
+  }
+
+  addPostFrameCallback();
 }

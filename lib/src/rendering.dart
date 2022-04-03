@@ -54,13 +54,7 @@ class SmootherParentLastChildState extends State<SmootherParentLastChild> {
       // If this callback is called, then the whole subtree should have been [layout]ed successfully
       // Thus, we can deal with some old work
       // SmootherFacade.instance.workQueue.executeMany();
-      SmootherFacade.instance.workQueue.maybeExecuteOne(
-        debugReason: 'SmootherParentLastChild LayoutBuilder.build',
-        // At least execute one, even if are already too late. Otherwise, on low-end devices,
-        // it can happen that *no* work is executed on *each and every* frame, so the objects
-        // are never rendered.
-        forceExecuteEvenAfterDeadline: true,
-      );
+      SmootherFacade.instance.workQueue.maybeExecuteOne(debugReason: 'SmootherParentLastChild LayoutBuilder.build');
 
       return const SizedBox.shrink();
     });
@@ -127,8 +121,12 @@ class _SmootherState extends State<Smoother> {
         logger('Smoother.LayoutBuilder builder called');
 
         if (activeChild != widget.child) {
-          if (SmootherFacade.instance.scheduler.shouldExecute()) {
+          // only if [activeChild != widget.child], we need to consider carefully whether really change this child
+          final effectiveShouldExecute =
+              !SmootherFacade.instance.hasSwapChildInCurrentFrame || SmootherFacade.instance.scheduler.shouldExecute();
+          if (effectiveShouldExecute) {
             activeChild = widget.child;
+            SmootherFacade.instance.hasSwapChildInCurrentFrame = true;
           } else {
             logger('Smoother workQueue.add ${shortHash(this)} since skip execute');
             SmootherFacade.instance.workQueue.add(_onWorkQueueExecute);
@@ -311,7 +309,6 @@ class RenderSmootherRaw extends RenderProxyBox {
       _executeWorkQueueNextWorkAfterSelfLayout = false;
       SmootherFacade.instance.workQueue.maybeExecuteOne(
         debugReason: 'RenderSmootherRaw.performLayout',
-        forceExecuteEvenAfterDeadline: false,
       );
     }
 

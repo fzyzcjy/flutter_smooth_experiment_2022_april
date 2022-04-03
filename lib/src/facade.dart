@@ -8,6 +8,11 @@ class SmootherFacade {
 
   SmootherFacade._() {
     SmootherWidgetsFlutterBinding.ensureInitialized();
+
+    addPostFrameCallbackForAllFrames((_) {
+      hasSwapChildInCurrentFrame = false;
+      hasExecuteWorkQueueInCurrentFrame = false;
+    });
   }
 
   static void init() {
@@ -15,6 +20,15 @@ class SmootherFacade {
   }
 
   var debugDisableFunctionality = false;
+
+  // TODO move this state variable
+  // At least execute one, even if are already too late. Otherwise, on low-end devices,
+  // it can happen that *no* work is executed on *each and every* frame, so the objects
+  // are never rendered.
+  @internal
+  var hasSwapChildInCurrentFrame = false;
+  @internal
+  var hasExecuteWorkQueueInCurrentFrame = false;
 
   @internal
   final scheduler = SmootherScheduler.raw();
