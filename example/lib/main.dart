@@ -101,6 +101,7 @@ class _SecondPageState extends State<SecondPage> {
               builder: (_, constraints) => ListView.builder(
                 itemCount: 100,
                 itemBuilder: (_, index) => Smoother(
+                  debugName: '$index',
                   placeholder: SmootherPlaceholder(
                     size: Size(constraints.maxWidth, 48),
                   ),
