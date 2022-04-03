@@ -191,6 +191,8 @@ class RenderSmootherRaw extends RenderProxyBox {
     //     '[$debugName] performLayout start elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
 
     if (SmootherFacade.instance.scheduler.shouldExecute()) {
+      logger('[$debugName] performLayout execute');
+
       super.performLayout();
       _hasSkippedChildLayout = false;
     } else {
