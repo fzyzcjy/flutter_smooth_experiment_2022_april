@@ -50,14 +50,40 @@ class SmootherParentLastChildState extends State<SmootherParentLastChild> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (_, __) {
-      // If this callback is called, then the whole subtree should have been [layout]ed successfully
-      // Thus, we can deal with some old work
-      // SmootherFacade.instance.workQueue.executeMany();
-      SmootherFacade.instance.workQueue.maybeExecuteOne(debugReason: 'SmootherParentLastChild LayoutBuilder.build');
+    return const SmootherParentLastChildRaw();
+  }
+}
 
-      return const SizedBox.shrink();
-    });
+class SmootherParentLastChildRaw extends SingleChildRenderObjectWidget {
+  const SmootherParentLastChildRaw({
+    Key? key,
+    Widget? child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderSmootherParentLastChildRaw createRenderObject(BuildContext context) {
+    return RenderSmootherParentLastChildRaw();
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSmootherParentLastChildRaw renderObject) {
+    // nothing
+  }
+}
+
+class RenderSmootherParentLastChildRaw extends RenderProxyBox with DisposeStatusRenderBoxMixin {
+  RenderSmootherParentLastChildRaw({
+    RenderBox? child,
+  }) : super(child);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+
+    // If this callback is called, then the whole subtree should have been [layout]ed successfully
+    // Thus, we can deal with some old work
+    // SmootherFacade.instance.workQueue.executeMany();
+    SmootherFacade.instance.workQueue.maybeExecuteOne(debugReason: 'RenderSmootherParentLastChildRaw.performLayout');
   }
 }
 
