@@ -15,15 +15,7 @@ class SmootherParent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // NOTE Use this "huge" SizedBox, thus RenderObject [constraints] is [isTight]=true.
-        //      Thus, it should be [relayout boundary].
-        //      https://github.com/fzyzcjy/yplusplus/issues/3397#issuecomment-1086872221
-        // (seems not useful)
-        SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: child,
-        ),
+        child,
         const SmootherParentLastChildRaw(),
       ],
     );
