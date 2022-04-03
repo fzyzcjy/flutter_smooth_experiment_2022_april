@@ -110,25 +110,30 @@ class _SecondPageState extends State<SecondPage> {
                   placeholder: SmootherPlaceholder(
                     size: Size(constraints.maxWidth, 48),
                   ),
-                  child: SizedBox(
-                    height: 48,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                      child: Row(
-                        children: [
-                          SizedBox(width: 48, child: Text('#$index')),
-                          Expanded(child: HeavyBuildPhaseWidget(heaviness: heaviness, debugName: '$index')),
-                          Expanded(child: HeavyLayoutPhaseWidget(heaviness: heaviness, debugName: '$index')),
-                          Expanded(child: HeavyPaintPhaseWidget(heaviness: heaviness, debugName: '$index')),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: _buildRow(index),
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  SizedBox _buildRow(int index) {
+    return SizedBox(
+      height: 48,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        child: Row(
+          children: [
+            SizedBox(width: 48, child: Text('#$index')),
+            if (index < 3) const SimpleTickBox(),
+            Expanded(child: HeavyBuildPhaseWidget(heaviness: heaviness, debugName: '$index')),
+            Expanded(child: HeavyLayoutPhaseWidget(heaviness: heaviness, debugName: '$index')),
+            Expanded(child: HeavyPaintPhaseWidget(heaviness: heaviness, debugName: '$index')),
+          ],
+        ),
       ),
     );
   }

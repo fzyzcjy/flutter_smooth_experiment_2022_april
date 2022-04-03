@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class SimpleAnimatedBox extends StatefulWidget {
@@ -22,6 +24,45 @@ class _SimpleAnimatedBoxState extends State<SimpleAnimatedBox> with SingleTicker
         height: 100,
         decoration: BoxDecoration(
           border: Border.all(color: Colors.blue),
+        ),
+      ),
+    );
+  }
+}
+
+class SimpleTickBox extends StatefulWidget {
+  const SimpleTickBox({Key? key}) : super(key: key);
+
+  @override
+  _SimpleTickBoxState createState() => _SimpleTickBoxState();
+}
+
+class _SimpleTickBoxState extends State<SimpleTickBox> {
+  var count = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        count++;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 48 + (count % 5) * 8,
+      child: Center(
+        child: Text(
+          '$count',
+          style: const TextStyle(fontSize: 24),
         ),
       ),
     );
