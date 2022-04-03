@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_smooth_render/src/custom_layout_builder.dart';
 import 'package:flutter_smooth_render/src/facade.dart';
 import 'package:flutter_smooth_render/src/misc.dart';
 
@@ -122,7 +123,9 @@ class _SmootherState extends State<Smoother> {
     return SmootherRaw(
       key: _smootherRawKey,
       debugName: widget.debugName,
-      child: LayoutBuilder(builder: (context, _) {
+      child: CustomLayoutBuilder(builder: (context, _) {
+        logger('Smoother.LayoutBuilder builder called');
+
         if (activeChild != widget.child) {
           if (SmootherFacade.instance.scheduler.shouldExecute()) {
             activeChild = widget.child;
@@ -291,6 +294,8 @@ class RenderSmootherRaw extends RenderProxyBox {
 
   @override
   void performLayout() {
+    logger('RenderSmootherRaw performLayout start child=$child child.sizedByParent=${child?.sizedByParent}');
+
     super.performLayout();
 
     if (_executeWorkQueueNextWorkAfterSelfLayout) {
