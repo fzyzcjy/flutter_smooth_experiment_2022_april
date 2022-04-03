@@ -38,10 +38,21 @@ class SmootherWorkQueue {
   void add(RenderSmootherRaw item) => _queue.add(item);
 
   void executeMany() {
+    // At least execute one, even if are already too late. Otherwise, on low-end devices,
+    // it can happen that *no* work is executed on *each and every* frame, so the objects
+    // are never rendered.
+    _executeOne();
+
     while (SmootherFacade.instance.scheduler.shouldExecute() && _queue.isNotEmpty) {
-      final item = _queue.removeFirst();
-      logger('SmootherWorkQueue executeUntilDeadline markNeedsLayout for ${describeIdentity(item)}');
-      item.markNeedsLayout();
+      _executeOne();
     }
+  }
+
+  void _executeOne() {
+    if (_queue.isEmpty) return;
+
+    final item = _queue.removeFirst();
+    logger('SmootherWorkQueue executeUntilDeadline markNeedsLayout for ${describeIdentity(item)}');
+    item.markNeedsLayout();
   }
 }
