@@ -113,3 +113,30 @@ mixin DisposeStatusRenderBoxMixin on RenderBox {
     super.dispose();
   }
 }
+
+// implementation references [ValueKey]
+@immutable
+class SmootherLabel<T> {
+  /// Creates a label that delegates its [operator==] to the given value.
+  const SmootherLabel(this.value);
+
+  /// The value to which this label delegates its [operator==]
+  final T value;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SmootherLabel<T> && other.value == value;
+  }
+
+  @override
+  int get hashCode => hashValues(runtimeType, value);
+
+  @override
+  String toString() {
+    final valueString = T == String ? "<'$value'>" : '<$value>';
+    return '[$T $valueString]';
+  }
+}

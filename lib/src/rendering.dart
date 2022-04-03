@@ -71,23 +71,20 @@ class RenderSmootherParentLastChildRaw extends RenderProxyBox with DisposeStatus
   }
 }
 
-const _kInitialDelayRenderTrigger = Object();
-const _kDefaultDelayRenderTrigger = Object();
-
 class Smoother extends StatefulWidget {
   final String debugName;
   final SmootherPlaceholder placeholder;
 
   /// If it changes, the new [child] will be delayed to be put into tree when it is not busy
   /// Otherwise, the [child] is *immediately* put into the tree, so this widget behaves as if a normal Container
-  final Object delayRenderTrigger;
+  final SmootherLabel<dynamic> delayRenderTrigger;
 
   final Widget child;
 
   const Smoother({
     Key? key,
     this.debugName = '',
-    this.delayRenderTrigger = _kDefaultDelayRenderTrigger,
+    this.delayRenderTrigger = const SmootherLabel<String>('Default'),
     this.placeholder = const SmootherPlaceholder(),
     required this.child,
   }) : super(key: key);
@@ -97,7 +94,7 @@ class Smoother extends StatefulWidget {
 }
 
 class _SmootherState extends State<Smoother> {
-  late Object activeDelayRenderTrigger;
+  late SmootherLabel<dynamic> activeDelayRenderTrigger;
   late Widget activeChild;
 
   // TODO maybe improve
@@ -109,7 +106,7 @@ class _SmootherState extends State<Smoother> {
 
     // hack
     final size = widget.placeholder.size.resolve(const BoxConstraints());
-    activeDelayRenderTrigger = _kInitialDelayRenderTrigger;
+    activeDelayRenderTrigger = const SmootherLabel<String>('Placeholder');
     activeChild = Container(
       width: size.width,
       height: size.height,
