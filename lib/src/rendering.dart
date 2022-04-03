@@ -20,6 +20,7 @@ class Smoother extends StatelessWidget {
       // child: LayoutBuilder(
       //   builder: (context, _) => builder(context),
       // ),
+      placeholder: placeholder,
       child: builder(context),
     );
   }
@@ -41,36 +42,71 @@ class SmootherPlaceholder {
     this.size = const Size(20, 20),
     this.color = Colors.transparent,
   });
+
+  @override
+  String toString() => 'SmootherPlaceholder{size: $size, color: $color}';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SmootherPlaceholder && runtimeType == other.runtimeType && size == other.size && color == other.color;
+
+  @override
+  int get hashCode => size.hashCode ^ color.hashCode;
 }
 
 class _SmootherRaw extends SingleChildRenderObjectWidget {
   const _SmootherRaw({
     Key? key,
+    required this.placeholder,
     Widget? child,
   }) : super(key: key, child: child);
 
+  final SmootherPlaceholder placeholder;
+
   @override
   _RenderSmootherRaw createRenderObject(BuildContext context) {
-    return _RenderSmootherRaw();
+    return _RenderSmootherRaw(
+      placeholder: placeholder,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSmootherRaw renderObject) {
-    // nothing yet
+    // ignore: avoid_single_cascade_in_expression_statements
+    renderObject //
+      ..placeholder = placeholder;
   }
 
   @override
   // ignore: unnecessary_overrides
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    // TODO some info
+    properties.add(DiagnosticsProperty('placeholder', placeholder));
   }
 }
 
 class _RenderSmootherRaw extends RenderProxyBox {
   _RenderSmootherRaw({
+    required SmootherPlaceholder placeholder,
     RenderBox? child,
-  }) : super(child);
+  })  : _placeholder = placeholder,
+        super(child);
+
+  SmootherPlaceholder get placeholder => _placeholder;
+  SmootherPlaceholder _placeholder;
+
+  set placeholder(SmootherPlaceholder value) {
+    if (_placeholder == value) {
+      return;
+    }
+
+    if (_placeholder.size != value.size) {
+      markNeedsLayout();
+    }
+
+    _placeholder = value;
+  }
 
   @override
   void layout(Constraints constraints, {bool parentUsesSize = false}) {
