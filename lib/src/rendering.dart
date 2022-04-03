@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_smooth_render/src/binding.dart';
 import 'package:flutter_smooth_render/src/misc.dart';
 
 class Smoother extends StatelessWidget {
@@ -110,9 +111,13 @@ class _RenderSmootherRaw extends RenderProxyBox {
 
   @override
   void performLayout() {
-    logger('hi performLayout start');
+    final lastFrameStart = SmootherBindingInfo.instance.lastFrameStart ?? DateTime.now();
+
+    logger('performLayout start elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
+
     super.performLayout();
-    logger('hi performLayout end');
+
+    logger('performLayout end elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
   }
 
   @override
