@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class HeavyBuildPhaseWidget extends StatefulWidget {
   final Duration heaviness;
   final Object? refreshTrigger;
-  final Widget child;
+  final Widget? child;
 
   const HeavyBuildPhaseWidget({
     Key? key,
     required this.heaviness,
     this.refreshTrigger,
-    required this.child,
+    this.child,
   }) : super(key: key);
 
   @override
@@ -32,19 +32,19 @@ class _HeavyBuildPhaseWidgetState extends State<HeavyBuildPhaseWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) => widget.child ?? _buildDefaultChild(color: Colors.lime);
 }
 
 class HeavyLayoutPhaseWidget extends StatelessWidget {
   final Duration heaviness;
   final Object? refreshTrigger;
-  final Widget child;
+  final Widget? child;
 
   const HeavyLayoutPhaseWidget({
     Key? key,
     required this.heaviness,
     this.refreshTrigger,
-    required this.child,
+    this.child,
   }) : super(key: key);
 
   @override
@@ -54,7 +54,7 @@ class HeavyLayoutPhaseWidget extends StatelessWidget {
         heaviness: heaviness,
         refreshTrigger: refreshTrigger,
       ),
-      child: child,
+      child: child ?? _buildDefaultChild(color: Colors.green),
     );
   }
 }
@@ -83,13 +83,13 @@ class _HeavySingleChildLayoutDelegate extends SingleChildLayoutDelegate {
 class HeavyPaintPhaseWidget extends StatelessWidget {
   final Duration heaviness;
   final Object? refreshTrigger;
-  final Widget child;
+  final Widget? child;
 
   const HeavyPaintPhaseWidget({
     Key? key,
     required this.heaviness,
     this.refreshTrigger,
-    required this.child,
+    this.child,
   }) : super(key: key);
 
   @override
@@ -99,7 +99,7 @@ class HeavyPaintPhaseWidget extends StatelessWidget {
         heaviness: heaviness,
         refreshTrigger: refreshTrigger,
       ),
-      child: child,
+      child: child ?? _buildDefaultChild(color: Colors.blue),
     );
   }
 }
@@ -139,3 +139,9 @@ int doHeavyWork(Duration heaviness) {
 
   return dummy;
 }
+
+Widget _buildDefaultChild({required Color color}) => Container(
+      width: 48,
+      height: 48,
+      color: color,
+    );

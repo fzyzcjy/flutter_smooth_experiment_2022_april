@@ -1,59 +1,102 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_smooth_render/flutter_smooth_render.dart';
+import 'package:flutter_smooth_render_example/heavy_widget.dart';
+import 'package:flutter_smooth_render_example/misc.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion = await FlutterSmoothRender.platformVersion ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
+      home: Theme(
+        data: ThemeData(
+          pageTransitionsTheme: PageTransitionsTheme(
+              builders: Map.fromEntries(TargetPlatform.values
+                  .map((platform) => MapEntry(platform, const CupertinoPageTransitionsBuilder())))),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        child: const FirstPage(),
+      ),
+    );
+  }
+}
+
+class FirstPage extends StatelessWidget {
+  const FirstPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('First')),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SimpleAnimatedBox(),
+            TextButton(
+              onPressed: () =>
+                  Navigator.push<dynamic>(context, MaterialPageRoute<dynamic>(builder: (_) => const SecondPage())),
+              child: const Text('Navigate'),
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class SecondPage extends StatefulWidget {
+  const SecondPage({Key? key}) : super(key: key);
+
+  @override
+  State<SecondPage> createState() => _SecondPageState();
+}
+
+class _SecondPageState extends State<SecondPage> {
+  var heaviness = const Duration(milliseconds: 1);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            const Text('Heaviness'),
+            for (final targetHeaviness in const [
+              Duration(milliseconds: 1),
+              Duration(milliseconds: 8),
+              Duration(milliseconds: 16)
+            ])
+              Expanded(
+                child: TextButton(
+                  onPressed: () => setState(() => heaviness = targetHeaviness),
+                  child: Text(
+                    '${targetHeaviness.inMilliseconds}ms',
+                    style: TextStyle(color: targetHeaviness == heaviness ? Colors.blue : Colors.black87),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: 100,
+            itemBuilder: (_, index) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(child: Center(child: HeavyBuildPhaseWidget(heaviness: heaviness))),
+                  Expanded(child: Center(child: HeavyLayoutPhaseWidget(heaviness: heaviness))),
+                  Expanded(child: Center(child: HeavyPaintPhaseWidget(heaviness: heaviness))),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
