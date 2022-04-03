@@ -92,13 +92,38 @@ class Smoother extends StatelessWidget {
   }
 }
 
+abstract class SmootherSizeResolver {
+  const SmootherSizeResolver();
+
+  const factory SmootherSizeResolver.constant(Size size) = _SmootherSizeResolverConstant;
+
+  Size resolve(BoxConstraints constraints);
+}
+
+class _SmootherSizeResolverConstant extends SmootherSizeResolver {
+  final Size size;
+
+  const _SmootherSizeResolverConstant(this.size);
+
+  @override
+  Size resolve(BoxConstraints constraints) => size;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _SmootherSizeResolverConstant && runtimeType == other.runtimeType && size == other.size;
+
+  @override
+  int get hashCode => size.hashCode;
+}
+
 @immutable
 class SmootherPlaceholder {
-  final Size size;
+  final SmootherSizeResolver size;
   final Color color;
 
   const SmootherPlaceholder({
-    this.size = const Size(20, 20),
+    this.size = const SmootherSizeResolver.constant(Size(20, 20)),
     this.color = Colors.transparent,
   });
 
@@ -200,7 +225,7 @@ class RenderSmootherRaw extends RenderProxyBox {
     } else {
       logger('[$debugName] performLayout skip');
 
-      size = constraints.constrain(placeholder.size);
+      size = placeholder.size.resolve(constraints);
       _hasSkippedChildLayout = true;
       SmootherFacade.instance.workQueue.add(_onWorkQueueExecute);
 

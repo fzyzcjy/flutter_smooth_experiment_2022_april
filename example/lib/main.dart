@@ -123,7 +123,7 @@ class _SecondPageState extends State<SecondPage> {
           child: Smoother(
             debugName: '$index',
             placeholder: SmootherPlaceholder(
-              size: Size(constraints.maxWidth, 48),
+              size: SmootherSizeResolver.constant(Size(constraints.maxWidth, 48)),
             ),
             child: SizedBox(
               height: 48,
