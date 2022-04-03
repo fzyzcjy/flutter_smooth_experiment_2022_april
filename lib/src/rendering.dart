@@ -152,7 +152,16 @@ class _SmootherState extends State<Smoother> {
       return;
     }
 
+    final customRenderLayoutBuilder = renderSmootherRaw.child as CustomRenderLayoutBuilder?;
+    if (customRenderLayoutBuilder == null) {
+      logger('Smoother onWorkQueueExecute skip since customRenderLayoutBuilder==null');
+      return;
+    }
+
     logger('Smoother onWorkQueueExecute markNeedsLayout');
+    // reason: otherwise even if [RenderSmoothRaw] re-layout, the [LayoutBuilder] will not call [LayoutBuilder.builder]
+    customRenderLayoutBuilder.markNeedsLayout();
+    // reason: wants to set `executeWorkQueueNextWorkAfterSelfLayout`
     renderSmootherRaw.markNeedsLayout(executeWorkQueueNextWorkAfterSelfLayout: true);
   }
 

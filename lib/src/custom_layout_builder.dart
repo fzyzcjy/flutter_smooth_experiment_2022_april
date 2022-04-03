@@ -11,7 +11,7 @@ class CustomLayoutBuilder extends LayoutBuilder {
   }) : super(key: key, builder: builder);
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _CustomRenderLayoutBuilder();
+  RenderObject createRenderObject(BuildContext context) => CustomRenderLayoutBuilder();
 }
 
 mixin CustomRenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildType extends RenderObject>
@@ -77,7 +77,7 @@ mixin CustomRenderConstrainedLayoutBuilder<ConstraintType extends Constraints, C
 }
 
 /// NOTE MODIFIED copy and modified from Flutter's `_RenderLayoutBuilder`
-class _CustomRenderLayoutBuilder extends RenderBox
+class CustomRenderLayoutBuilder extends RenderBox
     with RenderObjectWithChildMixin<RenderBox>, CustomRenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
   @override
   double computeMinIntrinsicWidth(double height) {
