@@ -14,6 +14,8 @@ class SmootherFacade {
     final _ = instance; // ensure it is initialized
   }
 
+  var debugDisableFunctionality = false;
+
   @internal
   final scheduler = SmootherScheduler.raw();
   @internal

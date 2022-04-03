@@ -73,6 +73,10 @@ class Smoother extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (SmootherFacade.instance.debugDisableFunctionality) {
+      return child;
+    }
+
     return SmootherRaw(
       debugName: debugName,
       placeholder: placeholder,
