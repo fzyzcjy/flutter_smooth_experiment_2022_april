@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_smooth_render/flutter_smooth_render.dart';
+import 'package:flutter_smooth_render/src/misc.dart';
 
 class CustomLayoutBuilder extends LayoutBuilder {
   const CustomLayoutBuilder({
@@ -78,7 +79,11 @@ mixin CustomRenderConstrainedLayoutBuilder<ConstraintType extends Constraints, C
 
 /// NOTE MODIFIED copy and modified from Flutter's `_RenderLayoutBuilder`
 class CustomRenderLayoutBuilder extends RenderBox
-    with RenderObjectWithChildMixin<RenderBox>, CustomRenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
+    with
+        RenderObjectWithChildMixin<RenderBox>,
+        CustomRenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>,
+        // NOTE MODIFIED add this mixin
+        DisposeStatusRenderBoxMixin {
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());

@@ -140,19 +140,14 @@ class _SmootherState extends State<Smoother> {
 
   void _onWorkQueueExecute() {
     final renderSmootherRaw = _smootherRawKey.currentContext?.findRenderObject() as RenderSmootherRaw?;
-    if (renderSmootherRaw == null) {
-      logger('Smoother onWorkQueueExecute skip since renderSmootherRaw==null');
-      return;
-    }
-
-    if (renderSmootherRaw.disposed) {
-      logger('Smoother onWorkQueueExecute skip since renderSmootherRaw.disposed');
+    if (renderSmootherRaw == null || renderSmootherRaw.disposed) {
+      logger('Smoother onWorkQueueExecute skip since renderSmootherRaw($renderSmootherRaw)');
       return;
     }
 
     final customRenderLayoutBuilder = renderSmootherRaw.child as CustomRenderLayoutBuilder?;
-    if (customRenderLayoutBuilder == null) {
-      logger('Smoother onWorkQueueExecute skip since customRenderLayoutBuilder==null');
+    if (customRenderLayoutBuilder == null || customRenderLayoutBuilder.disposed) {
+      logger('Smoother onWorkQueueExecute skip since customRenderLayoutBuilder($customRenderLayoutBuilder)');
       return;
     }
 
