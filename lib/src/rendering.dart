@@ -118,7 +118,7 @@ class _RenderSmootherRaw extends RenderProxyBox {
     _placeholder = value;
   }
 
-  var _childLayoutUpToDate = false;
+  var _hasSkippedChildLayout = false;
 
   @override
   void performLayout() {
@@ -128,12 +128,12 @@ class _RenderSmootherRaw extends RenderProxyBox {
 
     if (SmootherFacade.instance.scheduler.shouldStartPieceOfWork()) {
       super.performLayout();
-      _childLayoutUpToDate = true;
+      _hasSkippedChildLayout = false;
     } else {
       logger('[$debugName] performLayout skip');
 
       size = constraints.constrain(placeholder.size);
-      _childLayoutUpToDate = false;
+      _hasSkippedChildLayout = true;
 
       // TODO redo the work in the next frame
     }
@@ -147,7 +147,7 @@ class _RenderSmootherRaw extends RenderProxyBox {
     // according to comments of [visitChildrenForSemantics], it should "skip all
     // children that are not semantically relevant (e.g. because they are invisible)".
     // Thus, when the child does not have up-to-date [layout], we should not visit it.
-    if (_childLayoutUpToDate) super.visitChildrenForSemantics(visitor);
+    if (!_hasSkippedChildLayout) super.visitChildrenForSemantics(visitor);
   }
 
   @override
