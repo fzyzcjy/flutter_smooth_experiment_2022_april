@@ -20,12 +20,11 @@ class Smoother extends StatelessWidget {
     return _SmootherRaw(
       debugName: debugName,
       placeholder: placeholder,
-      // NOTE try to use [LayoutBuilder] to merge "build" phase into "layout" phase
-      // TODO no need?
-      // child: LayoutBuilder(
-      //   builder: (context, _) => builder(context),
-      // ),
-      child: child,
+      // NOTE use [LayoutBuilder], such that the [initState]/[didUpdateWidget] of the subtree is called inside
+      // [_RenderSmootherRaw]'s [performLayout]
+      child: LayoutBuilder(
+        builder: (context, _) => child,
+      ),
     );
   }
 
