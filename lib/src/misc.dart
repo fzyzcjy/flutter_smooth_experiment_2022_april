@@ -58,18 +58,18 @@ class SmootherWorkQueue {
     });
   }
 
-  void executeMany() {
-    // At least execute one, even if are already too late. Otherwise, on low-end devices,
-    // it can happen that *no* work is executed on *each and every* frame, so the objects
-    // are never rendered.
-    _executeOne();
+  // void executeMany() {
+  //   // At least execute one, even if are already too late. Otherwise, on low-end devices,
+  //   // it can happen that *no* work is executed on *each and every* frame, so the objects
+  //   // are never rendered.
+  //   executeOne();
+  //
+  //   while (SmootherFacade.instance.scheduler.shouldExecute() && _queue.isNotEmpty) {
+  //     executeOne();
+  //   }
+  // }
 
-    while (SmootherFacade.instance.scheduler.shouldExecute() && _queue.isNotEmpty) {
-      _executeOne();
-    }
-  }
-
-  void _executeOne() {
+  void executeOne() {
     if (_queue.isEmpty) return;
 
     final item = _queue.removeFirst();

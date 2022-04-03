@@ -51,15 +51,16 @@ class SmootherParentLastChildState extends State<SmootherParentLastChild> {
     return LayoutBuilder(builder: (_, __) {
       // If this callback is called, then the whole subtree should have been [layout]ed successfully
       // Thus, we can deal with some old work
-      logger('SmootherParentLastChild call workQueue.executeMany');
-      SmootherFacade.instance.workQueue.executeMany();
+      logger('SmootherParentLastChild call workQueue.executeOne');
+      // SmootherFacade.instance.workQueue.executeMany();
+      SmootherFacade.instance.workQueue.executeOne();
 
       return const SizedBox.shrink();
     });
   }
 }
 
-class Smoother extends StatelessWidget {
+class Smoother extends StatefulWidget {
   final String debugName;
   final SmootherPlaceholder placeholder;
   final Widget child;
@@ -72,20 +73,70 @@ class Smoother extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<Smoother> createState() => _SmootherState();
+}
+
+class _SmootherState extends State<Smoother> {
+  late Widget activeChild;
+
+  // TODO maybe improve
+  final _smootherRawKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // hack
+    final size = widget.placeholder.size.resolve(const BoxConstraints());
+    activeChild = Container(
+      width: size.width,
+      height: size.height,
+      color: widget.placeholder.color,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (SmootherFacade.instance.debugDisableFunctionality) {
-      return child;
+      return widget.child;
     }
 
+    // return SmootherRaw(
+    //   debugName: debugName,
+    //   placeholder: placeholder,
+    //   // NOTE use [LayoutBuilder], such that the [initState]/[didUpdateWidget] of the subtree is called inside
+    //   // [_RenderSmootherRaw]'s [performLayout]
+    //   child: LayoutBuilder(
+    //     builder: (context, _) => child,
+    //   ),
+    // );
+
+    // NOTE use [LayoutBuilder], such that the [initState]/[didUpdateWidget] of the subtree is called inside
+    // [_RenderSmootherRaw]'s [performLayout]
     return SmootherRaw(
-      debugName: debugName,
-      placeholder: placeholder,
-      // NOTE use [LayoutBuilder], such that the [initState]/[didUpdateWidget] of the subtree is called inside
-      // [_RenderSmootherRaw]'s [performLayout]
-      child: LayoutBuilder(
-        builder: (context, _) => child,
-      ),
+      key: _smootherRawKey,
+      debugName: widget.debugName,
+      child: LayoutBuilder(builder: (context, _) {
+        if (activeChild != widget.child) {
+          if (SmootherFacade.instance.scheduler.shouldExecute()) {
+            activeChild = widget.child;
+          } else {
+            SmootherFacade.instance.workQueue.add(_onWorkQueueExecute);
+          }
+        }
+
+        return activeChild;
+      }),
     );
+  }
+
+  void _onWorkQueueExecute() {
+    final renderSmootherRaw = _smootherRawKey.currentContext?.findRenderObject() as RenderSmootherRaw?;
+
+    if (renderSmootherRaw != null && !renderSmootherRaw.disposed) {
+      logger('Smoother onWorkQueueExecute markNeedsLayout');
+      renderSmootherRaw.markNeedsLayout(executeWorkQueueNextWorkAfterSelfLayout: true);
+    }
   }
 
   @override
@@ -145,12 +196,13 @@ class SmootherPlaceholder {
 
 class SmootherRaw extends SingleChildRenderObjectWidget {
   final String debugName;
-  final SmootherPlaceholder placeholder;
+
+  // final SmootherPlaceholder placeholder;
 
   const SmootherRaw({
     Key? key,
     required this.debugName,
-    required this.placeholder,
+    // required this.placeholder,
     Widget? child,
   }) : super(key: key, child: child);
 
@@ -158,7 +210,7 @@ class SmootherRaw extends SingleChildRenderObjectWidget {
   RenderSmootherRaw createRenderObject(BuildContext context) {
     return RenderSmootherRaw(
       debugName: debugName,
-      placeholder: placeholder,
+      // placeholder: placeholder,
     );
   }
 
@@ -166,42 +218,43 @@ class SmootherRaw extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSmootherRaw renderObject) {
     // ignore: avoid_single_cascade_in_expression_statements
     renderObject //
-      ..debugName = debugName
-      ..placeholder = placeholder;
+      ..debugName = debugName;
+    // ..placeholder = placeholder
   }
 
-  @override
-  // ignore: unnecessary_overrides
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty('placeholder', placeholder));
-  }
+// @override
+// // ignore: unnecessary_overrides
+// void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+//   super.debugFillProperties(properties);
+//   properties.add(DiagnosticsProperty('placeholder', placeholder));
+// }
 }
 
 class RenderSmootherRaw extends RenderProxyBox {
   RenderSmootherRaw({
-    required SmootherPlaceholder placeholder,
+    // required SmootherPlaceholder placeholder,
     required this.debugName,
     RenderBox? child,
-  })  : _placeholder = placeholder,
+  }) :
+        // _placeholder = placeholder,
         super(child);
 
   String debugName;
 
-  SmootherPlaceholder get placeholder => _placeholder;
-  SmootherPlaceholder _placeholder;
-
-  set placeholder(SmootherPlaceholder value) {
-    if (_placeholder == value) {
-      return;
-    }
-
-    if (_placeholder.size != value.size) {
-      markNeedsLayout();
-    }
-
-    _placeholder = value;
-  }
+  // SmootherPlaceholder get placeholder => _placeholder;
+  // SmootherPlaceholder _placeholder;
+  //
+  // set placeholder(SmootherPlaceholder value) {
+  //   if (_placeholder == value) {
+  //     return;
+  //   }
+  //
+  //   if (_placeholder.size != value.size) {
+  //     markNeedsLayout();
+  //   }
+  //
+  //   _placeholder = value;
+  // }
 
   var disposed = false;
 
@@ -211,57 +264,73 @@ class RenderSmootherRaw extends RenderProxyBox {
     super.dispose();
   }
 
-  var _hasSkippedChildLayout = false;
-  var _hasSucceededLayout = false;
+  var _executeWorkQueueNextWorkAfterSelfLayout = false;
+
+  @override
+  void markNeedsLayout({bool executeWorkQueueNextWorkAfterSelfLayout = false}) {
+    super.markNeedsLayout();
+    _executeWorkQueueNextWorkAfterSelfLayout = executeWorkQueueNextWorkAfterSelfLayout;
+  }
+
+  // var _hasSkippedChildLayout = false;
+  // var _hasSucceededLayout = false;
 
   @override
   void performLayout() {
+    super.performLayout();
+
+    if (_executeWorkQueueNextWorkAfterSelfLayout) {
+      _executeWorkQueueNextWorkAfterSelfLayout = false;
+      logger('RenderSmootherRaw.performLayout call workQueue.executeOne');
+      SmootherFacade.instance.workQueue.executeOne();
+    }
+
     // final lastFrameStart = SmootherBindingInfo.instance.lastFrameStart ?? DateTime.now();
     // logger(
     //     '[$debugName] performLayout start elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
-
-    if (SmootherFacade.instance.scheduler.shouldExecute()) {
-      logger('[$debugName] performLayout execute');
-
-      super.performLayout();
-      _hasSkippedChildLayout = false;
-      _hasSucceededLayout = true;
-    } else {
-      logger('[$debugName] performLayout skip');
-
-      size = placeholder.size.resolve(constraints);
-      _hasSkippedChildLayout = true;
-      SmootherFacade.instance.workQueue.add(_onWorkQueueExecute);
-
-      // TODO redo the work in the next frame
-    }
-
+    //
+    // if (SmootherFacade.instance.scheduler.shouldExecute()) {
+    //   logger('[$debugName] performLayout execute');
+    //
+    //   super.performLayout();
+    //   _hasSkippedChildLayout = false;
+    //   _hasSucceededLayout = true;
+    // } else {
+    //   logger('[$debugName] performLayout skip');
+    //
+    //   size = placeholder.size.resolve(constraints);
+    //   _hasSkippedChildLayout = true;
+    //   SmootherFacade.instance.workQueue.add(_onWorkQueueExecute);
+    //
+    //   // TODO redo the work in the next frame
+    // }
+    //
     // logger(
     //     '[$debugName] performLayout end elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
   }
 
-  void _onWorkQueueExecute() {
-    if (!disposed) {
-      markNeedsLayout();
-    }
-  }
-
-  @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    // according to comments of [visitChildrenForSemantics], it should "skip all
-    // children that are not semantically relevant (e.g. because they are invisible)".
-    // Thus, when the child does not have up-to-date [layout], we should not visit it.
-    if (!_hasSkippedChildLayout) super.visitChildrenForSemantics(visitor);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_hasSucceededLayout) {
-      super.paint(context, offset);
-    } else {
-      context.canvas.drawRect(offset & size, Paint()..color = placeholder.color);
-    }
-  }
+  // void _onWorkQueueExecute() {
+  //   if (!disposed) {
+  //     markNeedsLayout();
+  //   }
+  // }
+  //
+  // @override
+  // void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+  //   // according to comments of [visitChildrenForSemantics], it should "skip all
+  //   // children that are not semantically relevant (e.g. because they are invisible)".
+  //   // Thus, when the child does not have up-to-date [layout], we should not visit it.
+  //   if (!_hasSkippedChildLayout) super.visitChildrenForSemantics(visitor);
+  // }
+  //
+  // @override
+  // void paint(PaintingContext context, Offset offset) {
+  //   if (_hasSucceededLayout) {
+  //     super.paint(context, offset);
+  //   } else {
+  //     context.canvas.drawRect(offset & size, Paint()..color = placeholder.color);
+  //   }
+  // }
 
   @override
   // ignore: unnecessary_overrides
