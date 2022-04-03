@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_smooth_render/src/facade.dart';
 import 'package:flutter_smooth_render/src/rendering.dart';
 
@@ -33,9 +34,28 @@ class SmootherWorkQueue {
 
   SmootherWorkQueue.raw();
 
-  bool get isNotEmpty => _queue.isNotEmpty;
+  void add(RenderSmootherRaw item) {
+    _queue.add(item);
+    _addPostFrameCallback();
+  }
 
-  void add(RenderSmootherRaw item) => _queue.add(item);
+  var _hasPostFrameCallback = false;
+
+  void _addPostFrameCallback() {
+    if (_hasPostFrameCallback) return;
+    _hasPostFrameCallback = true;
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      // If, after the current frame is finished, there is still some work to be done,
+      // Then we need to schedule a new frame
+      if (_queue.isNotEmpty) {
+        logger('SmootherParentLastChild.markNeedsBuild since SmootherWorkQueue.workQueue not empty');
+        SmootherFacade.instance.smootherParentLastChild?.markNeedsBuild();
+      }
+
+      _hasPostFrameCallback = false;
+    });
+  }
 
   void executeMany() {
     // At least execute one, even if are already too late. Otherwise, on low-end devices,

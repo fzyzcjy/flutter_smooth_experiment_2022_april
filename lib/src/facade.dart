@@ -1,5 +1,6 @@
 import 'package:flutter_smooth_render/src/binding.dart';
 import 'package:flutter_smooth_render/src/misc.dart';
+import 'package:flutter_smooth_render/src/rendering.dart';
 
 class SmootherFacade {
   static final instance = SmootherFacade._();
@@ -15,4 +16,5 @@ class SmootherFacade {
   final scheduler = SmootherScheduler.raw();
   final workQueue = SmootherWorkQueue.raw();
   final bindingInfo = SmootherBindingInfo.raw();
+  SmootherParentLastChildState? smootherParentLastChild;
 }

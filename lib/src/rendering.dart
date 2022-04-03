@@ -14,31 +14,40 @@ class SmootherParent extends StatelessWidget {
     return Stack(
       children: [
         child,
-        const _SmootherParentLastChild(),
+        const SmootherParentLastChild(),
       ],
     );
   }
 }
 
-class _SmootherParentLastChild extends StatefulWidget {
-  const _SmootherParentLastChild({Key? key}) : super(key: key);
+class SmootherParentLastChild extends StatefulWidget {
+  const SmootherParentLastChild({Key? key}) : super(key: key);
 
   @override
-  _SmootherParentLastChildState createState() => _SmootherParentLastChildState();
+  SmootherParentLastChildState createState() => SmootherParentLastChildState();
 }
 
-class _SmootherParentLastChildState extends State<_SmootherParentLastChild> {
+class SmootherParentLastChildState extends State<SmootherParentLastChild> {
+  @override
+  void initState() {
+    super.initState();
+
+    assert(SmootherFacade.instance.smootherParentLastChild == null);
+    SmootherFacade.instance.smootherParentLastChild = this;
+  }
+
+  @override
+  void dispose() {
+    assert(SmootherFacade.instance.smootherParentLastChild == this);
+    SmootherFacade.instance.smootherParentLastChild = null;
+
+    super.dispose();
+  }
+
+  void markNeedsBuild() => setState(() {});
+
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      // If, after the current frame is finished, there is still some work to be done,
-      // Then we need to schedule a new frame
-      if (SmootherFacade.instance.workQueue.isNotEmpty) {
-        logger('SmootherParentLastChild setState since workQueue not empty');
-        setState(() {});
-      }
-    });
-
     return LayoutBuilder(builder: (_, __) {
       // If this callback is called, then the whole subtree should have been [layout]ed successfully
       // Thus, we can deal with some old work
