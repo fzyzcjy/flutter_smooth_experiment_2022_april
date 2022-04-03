@@ -183,6 +183,7 @@ class RenderSmootherRaw extends RenderProxyBox {
   }
 
   var _hasSkippedChildLayout = false;
+  var _hasSucceededLayout = false;
 
   @override
   void performLayout() {
@@ -195,6 +196,7 @@ class RenderSmootherRaw extends RenderProxyBox {
 
       super.performLayout();
       _hasSkippedChildLayout = false;
+      _hasSucceededLayout = true;
     } else {
       logger('[$debugName] performLayout skip');
 
@@ -225,8 +227,11 @@ class RenderSmootherRaw extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // TODO
-    super.paint(context, offset);
+    if (_hasSucceededLayout) {
+      super.paint(context, offset);
+    } else {
+      context.canvas.drawRect(offset & size, Paint()..color = placeholder.color);
+    }
   }
 
   @override
