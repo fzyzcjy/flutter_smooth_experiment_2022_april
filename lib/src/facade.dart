@@ -37,5 +37,5 @@ class SmootherFacade {
   @internal
   final bindingInfo = SmootherBindingInfo.raw();
   @internal
-  SmootherParentLastChildState? smootherParentLastChild;
+  RenderSmootherParentLastChildRaw? smootherParentLastChild;
 }

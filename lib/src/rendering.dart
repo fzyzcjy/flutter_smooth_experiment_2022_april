@@ -16,41 +16,9 @@ class SmootherParent extends StatelessWidget {
     return Stack(
       children: [
         child,
-        const SmootherParentLastChild(),
+        const SmootherParentLastChildRaw(),
       ],
     );
-  }
-}
-
-class SmootherParentLastChild extends StatefulWidget {
-  const SmootherParentLastChild({Key? key}) : super(key: key);
-
-  @override
-  SmootherParentLastChildState createState() => SmootherParentLastChildState();
-}
-
-class SmootherParentLastChildState extends State<SmootherParentLastChild> {
-  @override
-  void initState() {
-    super.initState();
-
-    assert(SmootherFacade.instance.smootherParentLastChild == null);
-    SmootherFacade.instance.smootherParentLastChild = this;
-  }
-
-  @override
-  void dispose() {
-    assert(SmootherFacade.instance.smootherParentLastChild == this);
-    SmootherFacade.instance.smootherParentLastChild = null;
-
-    super.dispose();
-  }
-
-  void markNeedsBuild() => setState(() {});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SmootherParentLastChildRaw();
   }
 }
 
@@ -75,6 +43,22 @@ class RenderSmootherParentLastChildRaw extends RenderProxyBox with DisposeStatus
   RenderSmootherParentLastChildRaw({
     RenderBox? child,
   }) : super(child);
+
+  @override
+  void attach(covariant PipelineOwner owner) {
+    super.attach(owner);
+
+    assert(SmootherFacade.instance.smootherParentLastChild == null);
+    SmootherFacade.instance.smootherParentLastChild = this;
+  }
+
+  @override
+  void detach() {
+    assert(SmootherFacade.instance.smootherParentLastChild == this);
+    SmootherFacade.instance.smootherParentLastChild = null;
+
+    super.detach();
+  }
 
   @override
   void performLayout() {
@@ -320,9 +304,9 @@ class RenderSmootherRaw extends RenderProxyBox with DisposeStatusRenderBoxMixin 
 
     if (_executeWorkQueueNextWorkAfterSelfLayout) {
       _executeWorkQueueNextWorkAfterSelfLayout = false;
-      SmootherFacade.instance.workQueue.maybeExecuteOne(
-        debugReason: 'RenderSmootherRaw.performLayout',
-      );
+      // https://github.com/fzyzcjy/yplusplus/issues/3397#issuecomment-1086863179
+      // SmootherFacade.instance.workQueue.maybeExecuteOne(debugReason: 'RenderSmootherRaw.performLayout');
+      SmootherFacade.instance.smootherParentLastChild?.markNeedsLayout();
     }
 
     // final lastFrameStart = SmootherBindingInfo.instance.lastFrameStart ?? DateTime.now();

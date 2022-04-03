@@ -55,7 +55,7 @@ class SmootherWorkQueue {
       if (_queue.isNotEmpty) {
         logger(
             'SmootherWorkQueue call SmootherParentLastChild.markNeedsBuild since SmootherWorkQueue.workQueue not empty');
-        SmootherFacade.instance.smootherParentLastChild?.markNeedsBuild();
+        SmootherFacade.instance.smootherParentLastChild?.markNeedsLayout();
       }
 
       _hasPostFrameCallback = false;
