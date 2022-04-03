@@ -36,20 +36,24 @@ class SmootherWorkQueue {
 
   void add(SmootherWorkJob item) {
     _queue.add(item);
-    _addPostFrameCallback();
+    _maybeAddPostFrameCallback();
   }
 
   var _hasPostFrameCallback = false;
 
-  void _addPostFrameCallback() {
+  void _maybeAddPostFrameCallback() {
     if (_hasPostFrameCallback) return;
     _hasPostFrameCallback = true;
 
+    logger('SmootherWorkQueue addPostFrameCallback');
     WidgetsBinding.instance!.addPostFrameCallback((_) {
+      logger('SmootherWorkQueue inside postFrameCallback queue.len=${_queue.length}');
+     
       // If, after the current frame is finished, there is still some work to be done,
       // Then we need to schedule a new frame
       if (_queue.isNotEmpty) {
-        logger('SmootherParentLastChild.markNeedsBuild since SmootherWorkQueue.workQueue not empty');
+        logger(
+            'SmootherWorkQueue call SmootherParentLastChild.markNeedsBuild since SmootherWorkQueue.workQueue not empty');
         SmootherFacade.instance.smootherParentLastChild?.markNeedsBuild();
       }
 
@@ -73,7 +77,7 @@ class SmootherWorkQueue {
     required bool forceExecuteEvenAfterDeadline,
   }) {
     if (_queue.isEmpty) return;
-   
+
     if (!forceExecuteEvenAfterDeadline && !SmootherFacade.instance.scheduler.shouldExecute()) {
       return;
     }
@@ -81,5 +85,9 @@ class SmootherWorkQueue {
     final item = _queue.removeFirst();
     logger('SmootherWorkQueue executeOne run $item debugReason=$debugReason');
     item();
+
+    if (_queue.isNotEmpty) {
+      _maybeAddPostFrameCallback();
+    }
   }
 }
