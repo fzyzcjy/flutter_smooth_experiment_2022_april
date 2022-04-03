@@ -32,7 +32,8 @@ class _HeavyBuildPhaseWidgetState extends State<HeavyBuildPhaseWidget> {
     if (oldWidget.refreshTrigger != widget.refreshTrigger) _doHeavyWork();
   }
 
-  void _doHeavyWork() => doHeavyWork(widget.heaviness, debugName: 'Build${widget.debugName}');
+  // call debugName "Widget" not "Build", since it is more about initState/didUpdateWidget, instead of `build`
+  void _doHeavyWork() => doHeavyWork(widget.heaviness, debugName: 'Widget${widget.debugName}');
 
   @override
   Widget build(BuildContext context) => widget.child ?? _buildDefaultChild(color: Colors.lime);
@@ -79,7 +80,7 @@ class _HeavySingleChildLayoutDelegate extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     // This is run inside RenderObject's [layout] function
-    doHeavyWork(heaviness, debugName: 'Layout${debugName}');
+    doHeavyWork(heaviness, debugName: 'Layout$debugName');
     return Offset.zero;
   }
 
