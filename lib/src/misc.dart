@@ -17,6 +17,11 @@ class SmootherScheduler {
     if (lastFrameStart == null) return true; // not sure what to do... so fallback to conservative
 
     final currentDuration = DateTime.now().difference(lastFrameStart);
+    assert(() {
+      logger('shouldStartPieceOfWork currentDuration=${currentDuration.inMilliseconds}ms');
+      return true;
+    }());
+
     return currentDuration <= durationThreshold;
   }
 }
