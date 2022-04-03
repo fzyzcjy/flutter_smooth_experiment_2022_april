@@ -13,5 +13,6 @@ class SmootherFacade {
   }
 
   final scheduler = SmootherScheduler.raw();
+  final workQueue = SmootherWorkQueue.raw();
   final bindingInfo = SmootherBindingInfo.raw();
 }

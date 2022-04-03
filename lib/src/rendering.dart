@@ -3,6 +3,51 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_smooth_render/src/facade.dart';
 import 'package:flutter_smooth_render/src/misc.dart';
 
+/// Put this as high as possible in the tree
+class SmootherParent extends StatelessWidget {
+  final Widget child;
+
+  const SmootherParent({Key? key, required this.child}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        child,
+        const _SmootherParentLastChild(),
+      ],
+    );
+  }
+}
+
+class _SmootherParentLastChild extends StatefulWidget {
+  const _SmootherParentLastChild({Key? key}) : super(key: key);
+
+  @override
+  _SmootherParentLastChildState createState() => _SmootherParentLastChildState();
+}
+
+class _SmootherParentLastChildState extends State<_SmootherParentLastChild> {
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      // If, after the current frame is finished, there is still some work to be done,
+      // Then we need to schedule a new frame
+      if (SmootherFacade.instance.workQueue.isNotEmpty) {
+        setState(() {});
+      }
+    });
+
+    return LayoutBuilder(builder: (_, __) {
+      // If this callback is called, then the whole subtree should have been [layout]ed successfully
+      // Thus, we can deal with some old work
+      SmootherFacade.instance.workQueue.executeMany();
+
+      return const SizedBox.shrink();
+    });
+  }
+}
+
 class Smoother extends StatelessWidget {
   final String debugName;
   final SmootherPlaceholder placeholder;
@@ -17,7 +62,7 @@ class Smoother extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SmootherRaw(
+    return SmootherRaw(
       debugName: debugName,
       placeholder: placeholder,
       // NOTE use [LayoutBuilder], such that the [initState]/[didUpdateWidget] of the subtree is called inside
@@ -58,11 +103,11 @@ class SmootherPlaceholder {
   int get hashCode => size.hashCode ^ color.hashCode;
 }
 
-class _SmootherRaw extends SingleChildRenderObjectWidget {
+class SmootherRaw extends SingleChildRenderObjectWidget {
   final String debugName;
   final SmootherPlaceholder placeholder;
 
-  const _SmootherRaw({
+  const SmootherRaw({
     Key? key,
     required this.debugName,
     required this.placeholder,
@@ -70,15 +115,15 @@ class _SmootherRaw extends SingleChildRenderObjectWidget {
   }) : super(key: key, child: child);
 
   @override
-  _RenderSmootherRaw createRenderObject(BuildContext context) {
-    return _RenderSmootherRaw(
+  RenderSmootherRaw createRenderObject(BuildContext context) {
+    return RenderSmootherRaw(
       debugName: debugName,
       placeholder: placeholder,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSmootherRaw renderObject) {
+  void updateRenderObject(BuildContext context, RenderSmootherRaw renderObject) {
     // ignore: avoid_single_cascade_in_expression_statements
     renderObject //
       ..debugName = debugName
@@ -93,8 +138,8 @@ class _SmootherRaw extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderSmootherRaw extends RenderProxyBox {
-  _RenderSmootherRaw({
+class RenderSmootherRaw extends RenderProxyBox {
+  RenderSmootherRaw({
     required SmootherPlaceholder placeholder,
     required this.debugName,
     RenderBox? child,
@@ -126,7 +171,7 @@ class _RenderSmootherRaw extends RenderProxyBox {
     // logger(
     //     '[$debugName] performLayout start elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
 
-    if (SmootherFacade.instance.scheduler.shouldStartPieceOfWork()) {
+    if (SmootherFacade.instance.scheduler.shouldExecute()) {
       super.performLayout();
       _hasSkippedChildLayout = false;
     } else {
@@ -134,6 +179,7 @@ class _RenderSmootherRaw extends RenderProxyBox {
 
       size = constraints.constrain(placeholder.size);
       _hasSkippedChildLayout = true;
+      SmootherFacade.instance.workQueue.add(this);
 
       // TODO redo the work in the next frame
     }

@@ -14,14 +14,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Theme(
-        data: ThemeData(
-          pageTransitionsTheme: PageTransitionsTheme(
-              builders: Map.fromEntries(TargetPlatform.values
-                  .map((platform) => MapEntry(platform, const CupertinoPageTransitionsBuilder())))),
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: SmootherParent(
+        child: MaterialApp(
+          home: Theme(
+            data: ThemeData(
+              pageTransitionsTheme: PageTransitionsTheme(
+                  builders: Map.fromEntries(TargetPlatform.values
+                      .map((platform) => MapEntry(platform, const CupertinoPageTransitionsBuilder())))),
+            ),
+            child: const FirstPage(),
+          ),
         ),
-        child: const FirstPage(),
       ),
     );
   }
