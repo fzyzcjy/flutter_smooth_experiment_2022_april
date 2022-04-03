@@ -107,9 +107,9 @@ class _SecondPageState extends State<SecondPage> {
                     child: Row(
                       children: [
                         SizedBox(width: 48, child: Text('#$index')),
-                        Expanded(child: HeavyBuildPhaseWidget(heaviness: heaviness)),
-                        Expanded(child: HeavyLayoutPhaseWidget(heaviness: heaviness)),
-                        Expanded(child: HeavyPaintPhaseWidget(heaviness: heaviness)),
+                        Expanded(child: HeavyBuildPhaseWidget(heaviness: heaviness, debugName: '$index')),
+                        Expanded(child: HeavyLayoutPhaseWidget(heaviness: heaviness, debugName: '$index')),
+                        Expanded(child: HeavyPaintPhaseWidget(heaviness: heaviness, debugName: '$index')),
                       ],
                     ),
                   ),

@@ -3,12 +3,14 @@ import 'package:flutter_smooth_render/flutter_smooth_render.dart';
 
 class HeavyBuildPhaseWidget extends StatefulWidget {
   final Duration heaviness;
+  final String debugName;
   final Object? refreshTrigger;
   final Widget? child;
 
   const HeavyBuildPhaseWidget({
     Key? key,
     required this.heaviness,
+    this.debugName = '',
     this.refreshTrigger,
     this.child,
   }) : super(key: key);
@@ -30,7 +32,7 @@ class _HeavyBuildPhaseWidgetState extends State<HeavyBuildPhaseWidget> {
     if (oldWidget.refreshTrigger != widget.refreshTrigger) _doHeavyWork();
   }
 
-  void _doHeavyWork() => doHeavyWork(widget.heaviness, debugName: 'Build');
+  void _doHeavyWork() => doHeavyWork(widget.heaviness, debugName: 'Build${widget.debugName}');
 
   @override
   Widget build(BuildContext context) => widget.child ?? _buildDefaultChild(color: Colors.lime);
@@ -38,12 +40,14 @@ class _HeavyBuildPhaseWidgetState extends State<HeavyBuildPhaseWidget> {
 
 class HeavyLayoutPhaseWidget extends StatelessWidget {
   final Duration heaviness;
+  final String debugName;
   final Object? refreshTrigger;
   final Widget? child;
 
   const HeavyLayoutPhaseWidget({
     Key? key,
     required this.heaviness,
+    this.debugName = '',
     this.refreshTrigger,
     this.child,
   }) : super(key: key);
@@ -53,6 +57,7 @@ class HeavyLayoutPhaseWidget extends StatelessWidget {
     return CustomSingleChildLayout(
       delegate: _HeavySingleChildLayoutDelegate(
         heaviness: heaviness,
+        debugName: debugName,
         refreshTrigger: refreshTrigger,
       ),
       child: child ?? _buildDefaultChild(color: Colors.green),
@@ -62,17 +67,19 @@ class HeavyLayoutPhaseWidget extends StatelessWidget {
 
 class _HeavySingleChildLayoutDelegate extends SingleChildLayoutDelegate {
   final Duration heaviness;
+  final String debugName;
   final Object? refreshTrigger;
 
   _HeavySingleChildLayoutDelegate({
     required this.heaviness,
+    required this.debugName,
     this.refreshTrigger,
   });
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     // This is run inside RenderObject's [layout] function
-    doHeavyWork(heaviness, debugName: 'Layout');
+    doHeavyWork(heaviness, debugName: 'Layout${debugName}');
     return Offset.zero;
   }
 
@@ -83,12 +90,14 @@ class _HeavySingleChildLayoutDelegate extends SingleChildLayoutDelegate {
 
 class HeavyPaintPhaseWidget extends StatelessWidget {
   final Duration heaviness;
+  final String debugName;
   final Object? refreshTrigger;
   final Widget? child;
 
   const HeavyPaintPhaseWidget({
     Key? key,
     required this.heaviness,
+    this.debugName = '',
     this.refreshTrigger,
     this.child,
   }) : super(key: key);
@@ -98,6 +107,7 @@ class HeavyPaintPhaseWidget extends StatelessWidget {
     return CustomPaint(
       painter: _HeavyCustomPainter(
         heaviness: heaviness,
+        debugName: debugName,
         refreshTrigger: refreshTrigger,
       ),
       child: child ?? _buildDefaultChild(color: Colors.blue),
@@ -107,16 +117,18 @@ class HeavyPaintPhaseWidget extends StatelessWidget {
 
 class _HeavyCustomPainter extends CustomPainter {
   final Duration heaviness;
+  final String debugName;
   final Object? refreshTrigger;
 
   _HeavyCustomPainter({
     required this.heaviness,
+    required this.debugName,
     this.refreshTrigger,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    doHeavyWork(heaviness, debugName: 'Paint');
+    doHeavyWork(heaviness, debugName: 'Paint$debugName');
   }
 
   @override
