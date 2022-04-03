@@ -5,6 +5,7 @@ import 'package:flutter_smooth_render_example/heavy_widget.dart';
 import 'package:flutter_smooth_render_example/misc.dart';
 
 void main() {
+  SmootherWidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
