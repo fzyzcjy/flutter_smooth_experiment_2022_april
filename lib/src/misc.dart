@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smooth_render/src/facade.dart';
-import 'package:flutter_smooth_render/src/rendering.dart';
 
 var logger = _defaultLogger;
 
@@ -29,12 +28,14 @@ class SmootherScheduler {
   }
 }
 
+typedef SmootherWorkJob = void Function();
+
 class SmootherWorkQueue {
-  final _queue = Queue<RenderSmootherRaw>();
+  final _queue = Queue<SmootherWorkJob>();
 
   SmootherWorkQueue.raw();
 
-  void add(RenderSmootherRaw item) {
+  void add(SmootherWorkJob item) {
     _queue.add(item);
     _addPostFrameCallback();
   }
@@ -73,6 +74,6 @@ class SmootherWorkQueue {
 
     final item = _queue.removeFirst();
     logger('SmootherWorkQueue executeUntilDeadline markNeedsLayout for ${describeIdentity(item)}');
-    item.markNeedsLayout();
+    item();
   }
 }

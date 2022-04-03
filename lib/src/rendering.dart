@@ -174,6 +174,14 @@ class RenderSmootherRaw extends RenderProxyBox {
     _placeholder = value;
   }
 
+  var disposed = false;
+
+  @override
+  void dispose() {
+    disposed = true;
+    super.dispose();
+  }
+
   var _hasSkippedChildLayout = false;
 
   @override
@@ -190,13 +198,19 @@ class RenderSmootherRaw extends RenderProxyBox {
 
       size = constraints.constrain(placeholder.size);
       _hasSkippedChildLayout = true;
-      SmootherFacade.instance.workQueue.add(this);
+      SmootherFacade.instance.workQueue.add(_onWorkQueueExecute);
 
       // TODO redo the work in the next frame
     }
 
     // logger(
     //     '[$debugName] performLayout end elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
+  }
+
+  void _onWorkQueueExecute() {
+    if (!disposed) {
+      markNeedsLayout();
+    }
   }
 
   @override
