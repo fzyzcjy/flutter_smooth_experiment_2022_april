@@ -103,3 +103,13 @@ void addPostFrameCallbackForAllFrames(void Function(Duration) run) {
 
   addPostFrameCallback();
 }
+
+mixin DisposeStatusRenderBoxMixin on RenderBox {
+  var disposed = false;
+
+  @override
+  void dispose() {
+    disposed = true;
+    super.dispose();
+  }
+}

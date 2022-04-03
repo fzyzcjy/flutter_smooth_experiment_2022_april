@@ -254,7 +254,7 @@ class SmootherRaw extends SingleChildRenderObjectWidget {
 // }
 }
 
-class RenderSmootherRaw extends RenderProxyBox {
+class RenderSmootherRaw extends RenderProxyBox with DisposeStatusRenderBoxMixin {
   RenderSmootherRaw({
     // required SmootherPlaceholder placeholder,
     required this.debugName,
@@ -279,14 +279,6 @@ class RenderSmootherRaw extends RenderProxyBox {
   //
   //   _placeholder = value;
   // }
-
-  var disposed = false;
-
-  @override
-  void dispose() {
-    disposed = true;
-    super.dispose();
-  }
 
   var _executeWorkQueueNextWorkAfterSelfLayout = false;
 
