@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_smooth_render/src/misc.dart';
 
 class Smoother extends StatelessWidget {
   final SmootherPlaceholder placeholder;
@@ -72,8 +73,10 @@ class _RenderSmootherRaw extends RenderProxyBox {
 
   @override
   void layout(Constraints constraints, {bool parentUsesSize = false}) {
+    logger('hi layout start ${DateTime.now()}');
     // TODO
     super.layout(constraints, parentUsesSize: parentUsesSize);
+    logger('hi layout end ${DateTime.now()}');
   }
 
   @override

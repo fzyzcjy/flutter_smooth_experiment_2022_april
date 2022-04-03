@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_smooth_render/flutter_smooth_render.dart';
 
 class HeavyBuildPhaseWidget extends StatefulWidget {
   final Duration heaviness;
@@ -20,16 +21,16 @@ class _HeavyBuildPhaseWidgetState extends State<HeavyBuildPhaseWidget> {
   @override
   void initState() {
     super.initState();
-    doHeavyWork(widget.heaviness);
+    _doHeavyWork();
   }
 
   @override
   void didUpdateWidget(covariant HeavyBuildPhaseWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.refreshTrigger != widget.refreshTrigger) {
-      doHeavyWork(widget.heaviness);
-    }
+    if (oldWidget.refreshTrigger != widget.refreshTrigger) _doHeavyWork();
   }
+
+  void _doHeavyWork() => doHeavyWork(widget.heaviness, debugName: 'Build');
 
   @override
   Widget build(BuildContext context) => widget.child ?? _buildDefaultChild(color: Colors.lime);
@@ -71,7 +72,7 @@ class _HeavySingleChildLayoutDelegate extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     // This is run inside RenderObject's [layout] function
-    doHeavyWork(heaviness);
+    doHeavyWork(heaviness, debugName: 'Layout');
     return Offset.zero;
   }
 
@@ -115,14 +116,14 @@ class _HeavyCustomPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    doHeavyWork(heaviness);
+    doHeavyWork(heaviness, debugName: 'Paint');
   }
 
   @override
   bool shouldRepaint(covariant _HeavyCustomPainter oldDelegate) => oldDelegate.refreshTrigger != refreshTrigger;
 }
 
-int doHeavyWork(Duration heaviness) {
+int doHeavyWork(Duration heaviness, {required String debugName}) {
   final startTime = DateTime.now();
 
   var dummy = 0;
@@ -136,6 +137,9 @@ int doHeavyWork(Duration heaviness) {
   if (DateTime.now().difference(startTime) < heaviness) {
     throw Exception('doHeavyWork does not really execute that long');
   }
+
+  // ignore: avoid_print
+  logger('doHeavyWork[$debugName] end heaviness=${heaviness.inMilliseconds}ms');
 
   return dummy;
 }

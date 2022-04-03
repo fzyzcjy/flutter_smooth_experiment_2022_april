@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_smooth_render/flutter_smooth_render.dart';
 import 'package:flutter_smooth_render_example/heavy_widget.dart';
 import 'package:flutter_smooth_render_example/misc.dart';
 
@@ -56,10 +58,19 @@ class SecondPage extends StatefulWidget {
 }
 
 class _SecondPageState extends State<SecondPage> {
+  var seenFirstBuild = false;
   var heaviness = const Duration(milliseconds: 8);
 
   @override
   Widget build(BuildContext context) {
+    if (!seenFirstBuild) {
+      seenFirstBuild = true;
+      logger('SecondPage first build() called');
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        logger('SecondPage first frame finished');
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('First')),
       body: Column(
@@ -85,19 +96,22 @@ class _SecondPageState extends State<SecondPage> {
             ],
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: 100,
-              itemBuilder: (_, index) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: SizedBox(
-                  height: 32,
-                  child: Row(
-                    children: [
-                      SizedBox(width: 48, child: Text('#$index')),
-                      Expanded(child: HeavyBuildPhaseWidget(heaviness: heaviness)),
-                      Expanded(child: HeavyLayoutPhaseWidget(heaviness: heaviness)),
-                      Expanded(child: HeavyPaintPhaseWidget(heaviness: heaviness)),
-                    ],
+            // NOTE just an experiment. should place smoother at lower levels
+            child: Smoother(
+              builder: (_) => ListView.builder(
+                itemCount: 100,
+                itemBuilder: (_, index) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  child: SizedBox(
+                    height: 32,
+                    child: Row(
+                      children: [
+                        SizedBox(width: 48, child: Text('#$index')),
+                        Expanded(child: HeavyBuildPhaseWidget(heaviness: heaviness)),
+                        Expanded(child: HeavyLayoutPhaseWidget(heaviness: heaviness)),
+                        Expanded(child: HeavyPaintPhaseWidget(heaviness: heaviness)),
+                      ],
+                    ),
                   ),
                 ),
               ),
