@@ -7,6 +7,11 @@ import 'package:flutter_smooth_render_example/misc.dart';
 void main() {
   SmootherFacade.init();
   reportFrameEnd();
+
+  FlutterError.onError = (details) {
+    logger('!!!ERROR!!! $details');
+  };
+
   runApp(const MyApp());
 }
 
