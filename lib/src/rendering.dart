@@ -4,11 +4,13 @@ import 'package:flutter_smooth_render/src/binding.dart';
 import 'package:flutter_smooth_render/src/misc.dart';
 
 class Smoother extends StatelessWidget {
+  final String debugName;
   final SmootherPlaceholder placeholder;
   final WidgetBuilder builder;
 
   const Smoother({
     Key? key,
+    this.debugName = '',
     this.placeholder = const SmootherPlaceholder(),
     required this.builder,
   }) : super(key: key);
@@ -16,6 +18,7 @@ class Smoother extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SmootherRaw(
+      debugName: debugName,
       // NOTE try to use [LayoutBuilder] to merge "build" phase into "layout" phase
       // TODO no need?
       // child: LayoutBuilder(
@@ -57,17 +60,20 @@ class SmootherPlaceholder {
 }
 
 class _SmootherRaw extends SingleChildRenderObjectWidget {
+  final String debugName;
+  final SmootherPlaceholder placeholder;
+
   const _SmootherRaw({
     Key? key,
+    required this.debugName,
     required this.placeholder,
     Widget? child,
   }) : super(key: key, child: child);
 
-  final SmootherPlaceholder placeholder;
-
   @override
   _RenderSmootherRaw createRenderObject(BuildContext context) {
     return _RenderSmootherRaw(
+      debugName: debugName,
       placeholder: placeholder,
     );
   }
@@ -76,6 +82,7 @@ class _SmootherRaw extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderSmootherRaw renderObject) {
     // ignore: avoid_single_cascade_in_expression_statements
     renderObject //
+      ..debugName = debugName
       ..placeholder = placeholder;
   }
 
@@ -90,9 +97,12 @@ class _SmootherRaw extends SingleChildRenderObjectWidget {
 class _RenderSmootherRaw extends RenderProxyBox {
   _RenderSmootherRaw({
     required SmootherPlaceholder placeholder,
+    required this.debugName,
     RenderBox? child,
   })  : _placeholder = placeholder,
         super(child);
+
+  String debugName;
 
   SmootherPlaceholder get placeholder => _placeholder;
   SmootherPlaceholder _placeholder;
@@ -113,11 +123,13 @@ class _RenderSmootherRaw extends RenderProxyBox {
   void performLayout() {
     final lastFrameStart = SmootherBindingInfo.instance.lastFrameStart ?? DateTime.now();
 
-    logger('performLayout start elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
+    logger(
+        '[$debugName] performLayout start elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
 
     super.performLayout();
 
-    logger('performLayout end elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
+    logger(
+        '[$debugName] performLayout end elapsed=${DateTime.now().difference(lastFrameStart)} lastFrameStart=$lastFrameStart');
   }
 
   @override
